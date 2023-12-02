@@ -1,1 +1,1 @@
-from ufw_lib.ufw_lib import UFW
+from ufw_lib.ufw_lib import Ufw
