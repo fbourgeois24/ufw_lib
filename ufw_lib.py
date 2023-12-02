@@ -9,8 +9,11 @@ import ufw.util
 
 class UFW():
 
-    def __init__(self):
+    def __init__(self, activate_verif=True):
         self._init_gettext()
+
+        if not activate_verif:
+            ufw.common.do_checks = False
 
         self.frontend = ufw.frontend.UFWFrontend(dryrun=False)
         self.backend = self.frontend.backend
@@ -304,3 +307,29 @@ class UFW():
 
     def show_added(self):
         return self.get_rules()
+
+    def rule_to_ip(self, rule):
+        """ Converti une règle en format ip:port 
+            Exemples de sytaxe prise en charge
+            - allow 22 => 0.0.0.0:22
+            - allow from 0.0.0.0 => 0.0.0.0
+            - allow from 0.0.0.0 to any port 23 => 0.0.0.0:23
+        """
+        rule_elements = rule.split(" ")
+        
+        if rule_elements[1].isdigit():
+            # Si le port est en 2e position
+            return "0.0.0.0:" + rule_elements[1]
+
+        elif rule_elements[1] == "from":
+            # l'élément suivant est l'ip
+            ip = rule_elements[2]
+
+            if len(rule_elements) == 3:
+                # Le port n'a pas été spécifié
+                return ip
+            else:
+                # Le port a été spécifié
+                return f"{ip}:{rule_elements[6]}"
+
+        return None
