@@ -7,12 +7,21 @@ import ufw.parser
 import ufw.util
 
 
-class UFW():
+class Ufw():
 
-    def __init__(self, activate_verif=True):
+    def __init__(self, do_checks=True):
+        """ do_checks fait des vérifications de sécurité
+            is setuid or setgid (for non-Linux systems)
+            checks that script is owned by root
+            checks that every component in absolute path are owned by root
+            warn if script is group writable
+            warn if part of script path is group writable
+            Possibilité de les désactiver en mettant le paramètre à False
+        """
+
         self._init_gettext()
 
-        if not activate_verif:
+        if not do_checks:
             ufw.common.do_checks = False
 
         self.frontend = ufw.frontend.UFWFrontend(dryrun=False)
