@@ -36,13 +36,12 @@ log.debug(f"Règles actives avant intervention : {ufw.get_rules()}")
 
 # On lit les adresses et noms de domaine dans le fichier authorized.rules
 with open(local_path + "authorized.rules", 'r') as rules_file:
-	rules = rules_file.read().replace('\r', '').split('\n')
+	rules = rules_file.read().replace('\r', '').strip(" \n").split('\n')
 log.debug(f"Règles à appliquer : {rules}")
 
 
 # On résoud les noms de domaines
 resolved_dn = {} # On stocke les noms résolus
-resolved_rules = {}
 for rule in rules[:]:
 	addr, port = rule.split(":")
 	if not is_ip(addr):
@@ -58,7 +57,7 @@ for rule in rules[:]:
 			log.critical(f"Erreur de résolution du nom de domaine {addr}")
 			exit(1)
 
-log.debug(f"Règles résolues : {resolved_rules}")
+log.debug(f"Règles résolues : {rules}")
 
 # On compare les règles actives aux données du fichier (noms de domaines résolus)
 active_rules = ufw.get_rules()
