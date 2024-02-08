@@ -105,4 +105,5 @@ if change:
 	log.debug(f"Il y {'a eu' if not dry_run else 'aura'} au moins une modification de règle.")
 else:
 	log.debug("Aucune modification des règles")
-log.debug(f"Règles actives après intervention : {ufw.get_rules()}")
+if not dry_run:
+	log.debug(f"Règles actives après intervention : {ufw.get_rules()}")
