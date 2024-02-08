@@ -1,13 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+""" 
+Gestion du firewall ufw en standalone
+Les ip et noms de domaines à autoriser sont enregistrés dans authorized.rules.
+Les règles doivent tre au format ip:port ou nom:port
+"""
+
 import ufw_lib
-from util_lib import yaml_parametres, logger, is_ip, resolve_dn
-import os
-import db_unified
+from util_lib import *
+import os, sys
+
 
 # Si vrai aucune règle n'est réellement modifiée
-dry_run = False
+if len(sys.argv) > 1 and sys.argv[0] == "apply":
+	dry_run = False
+else:
+	dry_run = True
 # Regarde si un changement a été appliqué
 change = False
 
@@ -22,17 +31,18 @@ if not ufw.status().get("status") == "active":
 log.info("ufw actif")
 
 local_path = os.path.dirname(os.path.realpath(__file__)) + "/"
-secrets = yaml_parametres(local_path + "local_secrets.yaml", read=True).content
-db = db_unified.db_unified(config=secrets["database"]["gesmat"])
 
 log.debug(f"Règles actives avant intervention : {ufw.get_rules()}")
 
-# On lit les adresses et noms de domaine dans la db
-rules = db.exec(''' SELECT valeur FROM parametres WHERE contexte = 'firewall' AND nom LIKE 'allow%' ''', fetch='list')
+# On lit les adresses et noms de domaine dans le fichier authorized.rules
+with open(local_path + "authorized.rules", 'r') as rules_file:
+	rules = rules_file.read().replace('\r', '').split('\n')
 log.debug(f"Règles à appliquer : {rules}")
+
 
 # On résoud les noms de domaines
 resolved_dn = {} # On stocke les noms résolus
+resolved_rules = {}
 for rule in rules[:]:
 	addr, port = rule.split(":")
 	if not is_ip(addr):
@@ -48,10 +58,12 @@ for rule in rules[:]:
 			log.critical(f"Erreur de résolution du nom de domaine {addr}")
 			exit(1)
 
-# On compare les règles actives aux données de la db (noms de domaines résolus)
+log.debug(f"Règles résolues : {resolved_rules}")
+
+# On compare les règles actives aux données du fichier (noms de domaines résolus)
 active_rules = ufw.get_rules()
 
-# On parcours les règles du firewall pour trouver celles qui ne sont pas dans la db
+# On parcours les règles du firewall pour trouver celles qui ne sont pas dans le fichier
 for key, rule in active_rules.items():
 	log.debug(f"Règle numéro {key}")
 	rule_ip = ufw.rule_to_ip(rule)
@@ -71,7 +83,7 @@ for key, rule in active_rules.items():
 active_rules = ufw.get_rules().values()
 active_rules_ip = [ufw.rule_to_ip(rule) for rule in active_rules]
 
-# On parcours les règles de la db pour comparer à celles du firewall
+# On parcours les règles du fichier pour comparer à celles du firewall
 for rule in rules:
 	if rule not in active_rules_ip:
 		# Si la règle n'est pas dans le firewall, on l'ajoute

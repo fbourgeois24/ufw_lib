@@ -1,46 +1,4 @@
 import subprocess
-import yaml
-import os
-
-class Loader(yaml.SafeLoader):
-	""" Custom loader, permet d'inclure des fichiers yaml depuis d'autres via !include """
-
-	def __init__(self, stream):
-		self._root = os.path.split(stream.name)[0]
-		super(Loader, self).__init__(stream)
-
-	def include(self, node):
-		filename = os.path.join(self._root, self.construct_scalar(node))
-		try:
-			with open(filename, 'r') as f:
-				return yaml.load(f, Loader)
-		except FileNotFoundError:
-			return ""
-
-Loader.add_constructor('!include', Loader.include)
-
-class yaml_parametres():
-	""" Gestion des paramètres dans un fichier yaml externe
-		Lors de l'initialisation de la fonction, read permet de directement lire les valeurs qui seront stockées dans self.content
-		Dans ce cas les valeurs ne sont évidemment pas renvoyés sous forme de dictionnaire !
-	 """
-	def __init__(self, path, read=False):
-		self.path = path
-		self.content = {}
-		if read:
-			self.content = self.read()
-
-	def read(self):
-		""" Lire les paramètres et les stocker dans un dictionnaire
-			Lors de l'exécution de cette fonction, les paramètres sont stockés dans self.content et sont renvoyés
-		 """
-		with open(self.path, "r") as yaml_file:
-			dict_parameters = yaml.load(yaml_file, Loader=Loader)
-		if dict_parameters is None:
-			dict_parameters = {}
-		
-		self.content = dict_parameters
-		return dict_parameters
 
 def is_ip(addr):
 	""" Regarde si l'adresse est une adresse ip et renvoie un booléen """
