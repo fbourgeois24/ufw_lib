@@ -17,6 +17,7 @@ if len(sys.argv) > 1 and sys.argv[0] == "apply":
 	dry_run = False
 else:
 	dry_run = True
+	log.warning("DRY RUN ACTIF. Aucune modifcation sera appliquée. Pour appliquer les modifications, ajoutez 'apply' en argument à l'appel")
 # Regarde si un changement a été appliqué
 change = False
 
