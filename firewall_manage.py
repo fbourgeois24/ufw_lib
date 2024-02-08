@@ -13,7 +13,7 @@ import os, sys
 
 
 # Si vrai aucune règle n'est réellement modifiée
-if len(sys.argv) > 1 and sys.argv[0] == "apply":
+if len(sys.argv) > 1 and sys.argv[1] == "apply":
 	dry_run = False
 else:
 	dry_run = True
