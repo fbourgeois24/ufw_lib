@@ -320,15 +320,15 @@ class Ufw():
     def rule_to_ip(self, rule):
         """ Converti une règle en format ip:port 
             Exemples de sytaxe prise en charge
-            - allow 22 => 0.0.0.0:22
-            - allow from 0.0.0.0 => 0.0.0.0
-            - allow from 0.0.0.0 to any port 23 => 0.0.0.0:23
+            - allow 22 => 0.0.0.0/0:22
+            - allow from 0.0.0.0/0 => 0.0.0.0/0
+            - allow from 0.0.0.0/0 to any port 23 => 0.0.0.0/0:23
         """
         rule_elements = rule.split(" ")
         
         if rule_elements[1].isdigit():
             # Si le port est en 2e position
-            return "0.0.0.0:" + rule_elements[1]
+            return "0.0.0.0/0:" + rule_elements[1]
 
         elif rule_elements[1] == "from":
             # l'élément suivant est l'ip
