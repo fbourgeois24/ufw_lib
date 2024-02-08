@@ -324,7 +324,7 @@ class Ufw():
             - allow from 0.0.0.0/0 => 0.0.0.0/0
             - allow from 0.0.0.0/0 to any port 23 => 0.0.0.0/0:23
         """
-        rule_elements = rule.split(" ")
+        rule_elements = rule.replace("/tcp", "").split(" ")
         
         if rule_elements[1].isdigit():
             # Si le port est en 2e position
