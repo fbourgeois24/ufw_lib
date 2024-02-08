@@ -20,7 +20,9 @@ else:
 # Regarde si un changement a été appliqué
 change = False
 
-log = logger(name="firewall_manage")
+script_name = os.path.splitext(os.path.basename(__file__))[0]
+local_path = os.path.dirname(os.path.realpath(__file__)) + "/"
+log = util_lib.logger(name=script_name, stream_handler_level= 10, file_handler_path=local_path)
 if dry_run:
 	log.warning("DRY RUN ACTIF. Aucune modifcation sera appliquée. Pour appliquer les modifications, ajoutez 'apply' en argument à l'appel")
 
